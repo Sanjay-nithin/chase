@@ -1,0 +1,148 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url("{% static 'chase/image/background.jpg' %}") no-repeat center center/cover;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            text-align: center;
+            color: white;
+            width: 350px;
+        }
+        
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 18px;
+            border: 2px solid white;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            background: #ffcc00;
+            color: black;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out;
+        }
+
+        .btn:hover {
+            background: #ffaa00;
+        }
+
+        .toggle-link {
+            color: #ffcc00;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 id="formTitle">Team Login</h2>
+
+        <!-- Login Form -->
+        <form id="loginForm">
+            <input type="text" id="loginTeamName" placeholder="Team Name" required>
+            <button type="button" class="btn" onclick="loginTeam()">Login</button>
+            <p>New team? <span class="toggle-link" onclick="toggleForms()">Register here</span></p>
+        </form>
+
+        <!-- Registration Form -->
+        <form id="registerForm" class="hidden">
+            <input type="text" id="registerTeamName" placeholder="Enter Team Name" required>
+            <button type="button" class="btn" onclick="registerTeam()">Register</button>
+            <p>Already have a team? <span class="toggle-link" onclick="toggleForms()">Login here</span></p>
+        </form>
+
+        <p id="message"></p>
+    </div>
+
+    <script>
+        function toggleForms() {
+            document.getElementById("loginForm").classList.toggle("hidden");
+            document.getElementById("registerForm").classList.toggle("hidden");
+            document.getElementById("formTitle").innerText = document.getElementById("loginForm").classList.contains("hidden") ? "Team Registration" : "Team Login";
+        }
+
+        function registerTeam() {
+            let teamName = document.getElementById("registerTeamName").value.trim();
+            if (teamName === "") {
+                document.getElementById("message").innerText = "Enter a valid team name.";
+                return;
+            }
+
+            fetch("{% url 'register_team' %}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json"},
+                body: JSON.stringify({ team_name: teamName })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("message").innerText = data.message;
+                if (data.success) {
+                    toggleForms(); // Switch to login form
+                }
+            });
+        }
+
+        function loginTeam() {
+            let teamName = document.getElementById("loginTeamName").value.trim();
+            if (teamName === "") {
+                document.getElementById("message").innerText = "Enter a valid team name.";
+                return;
+            }
+
+            fetch("{% url 'login_team' %}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json"},
+                body: JSON.stringify({ team_name: teamName })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("message").innerText = data.message;
+                if (data.success) {
+                    window.location.href = "{% url 'homepage' %}"; // Redirect to the game
+                }
+            });
+        }
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Cipher-Chase Level-1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/show-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/anyword-hint.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/show-hint.min.css">
+    <style>
+        body {
+            font-family: 'Fira Code', monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+        }
+    </style>
+</head>
+<body class="p-6 flex flex-col items-center justify-center min-h-screen">
+    <div class="text-4xl font-bold text-green-400 mb-6 text-center animate-pulse">
+        ⏳ Time Left: <span id="timer">15:00</span>
+    </div>
+
+    <div class="w-full max-w-3xl p-6 bg-gray-900 shadow-lg rounded-xl">
+        <label for="language" class="block text-lg font-semibold text-gray-300 mb-2">Select Language:</label>
+        <select id="language" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-white focus:ring focus:ring-blue-500">
+            <option value="python">Python</option>
+            <option value="c">C</option>
+            <option value="cpp">C++</option>
+            <option value="java">Java</option>
+        </select>
+
+        <label class="block text-lg font-semibold mt-4 text-gray-300">Write Your Code:</label>
+        <textarea id="code" class="w-full h-52 p-3 mt-2 rounded-lg bg-gray-800 border border-gray-700 text-white"></textarea>
+
+        <button id="run-btn" class="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg w-full shadow-lg transform hover:scale-105 transition">
+            ▶ Run Code
+        </button>
+
+        <div class="mt-4">
+            <h2 class="text-lg font-semibold text-yellow-300">Output:</h2>
+            <pre id="output" class="bg-gray-800 p-3 rounded-lg border border-gray-700 mt-2 min-h-[100px] text-white"></pre>
+        </div>
+    </div>
+
+    <div class="w-full flex justify-end mt-6">
+        <button id="next-btn"
+            class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-lg text-lg transition-all duration-200 transform hover:scale-105">
+            Next ➡️
+        </button>
+    </div>
+    
+    <button id="submit-btn" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg w-3/4 max-w-md text-lg shadow-lg transform hover:scale-105 transition">
+        🚀 Submit Code
+    </button>
+    
+
+    <script>
+        const editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+            mode: "text/x-python",
+            theme: "dracula",
+            lineNumbers: true,
+            autoCloseBrackets: true,
+        });
+        {% block questions %}
+        
+        {% endblock %}
+        const languageSnippets = {
+                "python": python_code,
+                "c": c_code,
+                "cpp": cpp_code,
+                "java": java_code,
+            };
+        
+        function setDefaultSnippet() {
+            const lang = document.getElementById("language").value;
+            editor.setValue(languageSnippets[lang]);
+            editor.setOption("mode", {
+                "python": "text/x-python",
+                "c": "text/x-csrc",
+                "cpp": "text/x-c++src",
+                "java": "text/x-java"
+            }[lang]);
+        }
+    
+        document.getElementById("language").addEventListener("change", setDefaultSnippet);
+        setDefaultSnippet();
+    
+        document.getElementById("run-btn").addEventListener("click", async () => {
+            const run_button = document.getElementById("run-btn");
+            run_button.classList.add("bg-blue-500");
+    
+            setTimeout(() => {
+                run_button.classList.remove("bg-blue-500");
+                run_button.classList.add("bg-green-500"); // Revert back to default
+            }, 300); 
+            const code = editor.getValue();
+            const language_code = {
+                "python": 71,
+                "c": 50,
+                "cpp": 54,
+                "java": 62,
+            };
+            const language = language_code[document.getElementById("language").value];
+            const API_URL = "http://localhost:2358/submissions";
+
+    
+            if (!code.trim()) {
+                alert("Please enter some code...");
+                return;
+            }
+            const data = {
+                language_id: language,
+                source_code: code,
+                stdin: 5,
+                cpu_time_limit: 2,
+                memory_limit: 128000
+            };
+    
+            try {
+                let response = await fetch(`${API_URL}?base64_encoded=false&wait=true`, {
+                    method: "POST",
+                    headers: {
+                        "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+                        "X-RapidAPI-Key": "9753e66d10msh1e4bfaa105b671cp19611ejsn74b6101c79b7",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+    
+                let result = await response.json();
+                {% block result_check %}
+                {% endblock %}
+            } catch (error) {
+                document.getElementById("output").textContent = "❌ Error: " + error.message;
+            }
+
+
+        });
+        
+        {% block timer %}
+        {% endblock %}
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const timerElement = document.getElementById("timer");
+            timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            sessionStorage.setItem("timeLeft", timeLeft);
+    
+            if (timeLeft < 60) {
+                timerElement.classList.add("text-red-500", "animate-pulse");
+            }
+            if (timeLeft === 0) {
+                document.getElementById("submit-btn").click();
+            }
+            else {
+                timeLeft--;
+                setTimeout(updateTimer, 1000);
+            }
+        }
+        updateTimer();
+    
+        document.getElementById("submit-btn").addEventListener("click", async () => {
+            showWarning("Code submitted successfully");
+            setTimeout(() => {
+                window.location.href = `{% url 'decrypt' level=1 %}`;
+            }, 2000); // Redirect after 2 seconds
+        });
+        
+        
+        // Function to show a custom warning message without disrupting fullscreen
+        function showWarning(message) {
+        let warningBox = document.getElementById("warning-box");
+        if (!warningBox) {
+            warningBox = document.createElement("div");
+            warningBox.id = "warning-box";
+            warningBox.style.position = "fixed";
+            warningBox.style.top = "10px";
+            warningBox.style.left = "50%";
+            warningBox.style.transform = "translateX(-50%)";
+            warningBox.style.background = "rgba(255, 0, 0, 0.9)";
+            warningBox.style.color = "#fff";
+            warningBox.style.padding = "10px 20px";
+            warningBox.style.borderRadius = "8px";
+            warningBox.style.zIndex = "9999";
+            warningBox.style.fontSize = "18px";
+            document.body.appendChild(warningBox);
+        }
+        warningBox.innerHTML = message;
+        warningBox.style.display = "block";
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            warningBox.style.display = "none";
+        }, 3000);
+        }
+        
+        // Disable right-click
+        document.addEventListener("contextmenu", function(event) {
+        event.preventDefault();
+        showWarning("⚠️ Right-click is disabled!");
+        });
+        
+        document.addEventListener("keydown", function(event) {
+        if ((event.ctrlKey || event.metaKey) && 
+            (event.key === "c" || event.key === "v" || event.key === "x" || event.key === "u")) {
+            event.preventDefault();
+            showWarning("⚠️ Copy-Paste is disabled!");
+        }
+        });
+        
+        
+        {% block redirection %}
+        {% endblock %}
+    </script>
+</body>
+</html>

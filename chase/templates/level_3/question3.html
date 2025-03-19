@@ -1,0 +1,45 @@
+{% extends 'level_3/level3base.html' %} 
+
+{% block timer %}
+let timeLeft = sessionStorage.getItem("timeLeft") ? parseInt(sessionStorage.getItem("timeLeft")) : 1800;
+{% endblock %}
+
+{% block content %}
+<div
+  class="w-full lg:w-1/3 bg-gray-800 p-6 rounded-xl shadow-xl border border-gray-700"
+>
+  <h1 class="text-3xl font-bold text-cyan-400">CHALLENGE-3</h1>
+  <h2 class="text-xl font-semibold mt-2 text-gray-200">3.	The Siege of the Throne:</h2>
+  <p class="mt-4 text-gray-300">
+    Create a linked list and insert a value in the last.
+    Input Format:
+      First number is the size of the linked list n. Next n elements should be added in a linked list and the last number should be inserted in the linked list.
+  </p>
+  <h3 class="text-lg font-semibold mt-4 text-yellow-400">TEST CASE:</h3>
+  <p id="input" class="bg-gray-700 text-gray-200 p-2 rounded mt-2">
+    INPUT: 5 10 20 30 40 50 100
+  </p>
+  <p>OUTPUT: 10 20 30 40 50 100</p>
+</div>
+{% endblock %}
+
+{% block data %}
+const data = {
+    language_id: language,
+    source_code: code,
+    stdin: "5 10 20 30 40 50 60" , 
+    cpu_time_limit: 2,
+    memory_limit: 128000
+};
+{% endblock %}
+
+{% block result_check %}
+    let ans = result.stdout || result.stderr || "No output";
+    const code = editor.getValue();
+    if (ans.trim() === "10 20 30 40 50 100") {
+        document.getElementById("output").textContent = "-.--.- (Note this morse code for further use)";
+    }
+    else {
+        document.getElementById("output").textContent = ans;
+    }
+{% endblock %}

@@ -1,0 +1,246 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mascot Transition</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: url("{% static 'chase/image/digital-art-old-map-with-terrain-locations.jpg' %}") no-repeat center center/cover;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Mascot container - Bottom Left */
+        .mascot-container {
+            position: absolute;
+            bottom: 0%;
+            left: 5%;
+            max-width: 30%;
+        }
+
+        .mascot {
+            width: 100%;
+            height: auto;
+            display: none;
+        }
+
+        .next-btn {
+            position: absolute;
+            right: 25%;
+            top: 26%;
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(4);
+            transition: opacity 4s ease-in-out, transform 4s ease-in-out;
+        }
+
+        .next-btn.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .morse-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            width: 60%;
+            max-width: 500px;
+        }
+        #timer {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+            transition: color 0.5s ease-in-out;
+        }
+        
+        .timer-warning {
+            color: red !important;
+            text-shadow: 0 0 20px red !important;
+            animation: flash 1s infinite;
+        }
+        
+        @keyframes flash {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        
+        #morseInput {
+            width: 90%;
+            padding: 12px;
+            font-size: 24px; /* Large font */
+            font-weight: bold; /* Bold text */
+            border: 3px solid #fff;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+            outline: none;
+        }
+        
+        #morseInput::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: bold;
+        }
+        
+        .submit-btn {
+            margin-top: 15px;
+            padding: 12px 24px;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            background: #ffcc00;
+            color: black;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out;
+        }
+        
+        .submit-btn:hover {
+            background: #ffaa00;
+        }
+        
+        #resultMessage {
+            margin-top: 15px;
+            font-size: 22px; /* Larger text */
+            font-weight: bold;
+            color: white;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Mascot container -->
+    <div class="mascot-container">
+        <img id="mascot1" class="mascot" src="{% static 'chase/image/Level-1_Mascot_(C-11_C-20)/C-16.png' %}">
+        <img id="mascot2" class="mascot" src="{% static 'chase/image/Level-1_Mascot_(C-11_C-20)/C-17.png' %}">
+    </div>
+
+    <!-- Next Button -->
+    <img id="nextButton" class="next-btn"
+        src="{% static 'chase/image/start img.png' %}"
+        onclick="
+        if (document.querySelector('.morse-container').style.display === 'none') {
+            window.location.href='{% url 'open_level' level=4 %}';             
+    }">
+
+    <!-- Background Music -->
+    <audio id="bgMusic" loop>
+        <source src="{% static 'chase/audio/level 1 bgm 10 min.mp3' %}" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div class="morse-container">
+        <p id="timer">03:00</p> <!-- Timer display -->
+        <input id="morseInput" type="text" placeholder="Enter Morse Code" onkeypress="handleEnter(event)">
+        <button class="submit-btn" onclick="checkMorseCode()">Submit</button>
+        <p id="resultMessage"></p> <!-- For feedback -->
+    </div>
+    
+
+    <script>
+        let mascots = document.querySelectorAll('.mascot');
+        let nextButton = document.getElementById('nextButton');
+        let bgMusic = document.getElementById('bgMusic');
+        let currentMascot = 0;
+        let musicStarted = false;
+        
+        function showNextMascot() {
+            if (!musicStarted) {
+                bgMusic.play().catch(error => console.log("Autoplay blocked:", error));
+                musicStarted = true;
+            }
+
+            if (currentMascot > 0) {
+                mascots[currentMascot - 1].style.display = "none"; // Hide previous mascot
+            }
+
+            if (currentMascot < mascots.length) {
+                mascots[currentMascot].style.display = "block"; // Show current mascot
+                currentMascot++;
+            } else {
+                nextButton.classList.add("show"); // Show next button when all mascots are displayed
+            }
+        }
+        // Only show the next mascot only after the code checking
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') {
+                if (document.querySelector(".morse-container").style.display === "none") {
+                    showNextMascot();
+                }
+            }
+        });
+
+        window.onload = function () {
+            mascots[0].style.display = "block"; // Show first mascot
+        };
+
+        // morse code convertor API
+        let timeLeft = 180; // 3 minutes (180 seconds)
+    let timerElement = document.getElementById("timer");
+    
+    function startTimer() {
+        let countdown = setInterval(function () {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            timerElement.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                document.getElementById("resultMessage").innerText = "Time's up!";
+                // Proceed with game logic
+            } 
+            timeLeft--;
+        }, 1000);
+    }
+
+    window.onload = function () {
+        mascots[0].style.display = "block"; // Show first mascot
+        startTimer(); // Start the countdown timer
+    };
+
+    function checkMorseCode() {
+        let morseCode = document.getElementById("morseInput").value.trim();
+        let correctAnswer = ")@!"; // Replace with the actual correct answer
+
+        if (morseCode === "") {
+            document.getElementById("resultMessage").innerText = "Please enter Morse code.";
+            return;
+        }
+
+        fetch(`https://api.funtranslations.com/translate/morse2english.json?text=${encodeURIComponent(morseCode)}`)
+            .then(response => response.json())
+            .then(data => {
+                let decodedText = data.contents.translated.toUpperCase();
+
+                if (decodedText === correctAnswer) {
+                    document.getElementById("resultMessage").innerText = "Correct! Moving to the next step.";
+                    document.querySelector(".morse-container").style.display = "none"; 
+                    showNextMascot();
+                } else {
+                    document.getElementById("resultMessage").innerText = "Incorrect Morse code. Try again!";
+                    // showEvilMascot();
+                }
+            })
+            .catch(error => console.error("Error:", error));
+    }
+    </script>
+
+</body>
+</html>

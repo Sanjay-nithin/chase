@@ -1,0 +1,106 @@
+{% extends 'level_1/level1base.html' %}
+
+{% block timer %}
+let timeLeft = sessionStorage.getItem("timeLeft") ? parseInt(sessionStorage.getItem("timeLeft")) : 900;
+{% endblock %}
+
+{% block questions %}
+let python_code = `
+def square_numbers(numbers):
+    result = []
+    for num in numbers:
+        result.append(num ** 2)
+    return  
+
+nums = [1, 2, 3, 4, 5]
+print(square_numbers(nums)) 
+
+`;
+
+let java_code = `
+import java.util.*;
+
+class Main {
+    public static List<Integer> squareNumbers(List<Integer> numbers) {
+        List<Integer> result = new ArrayList<>();
+        for (int num : numbers) {
+            result.add(num * num);
+        }
+        return;
+    }
+
+    public static void main(String[] args) {
+        List<Integer> nums = Arrays.asList(1, 2, 3, 4, 5);
+        List<Integer> squared = squareNumbers(nums);
+
+        System.out.println(squared);
+    }
+}
+
+
+`;
+
+let cpp_code = `#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> squareNumbers(vector<int> numbers) {
+    vector<int> result;
+    for (int num : numbers) {
+        result.push_back(num * num);
+    }
+    return;
+}
+
+int main() {
+    vector<int> nums = {1, 2, 3, 4, 5};
+    vector<int> squared = squareNumbers(nums);
+
+    for (int num : squared) {
+        cout << num << " ";
+    }
+    cout << endl;
+
+    return 0;
+}
+    
+`;
+
+let c_code = `
+#include <stdio.h>
+
+    void squareNumbers(int numbers[], int result[], int size) {
+        for (int i = 0; i < size; i++) {
+            result[i] = numbers[i] * numbers[i];
+        }
+        return; 
+    }
+    
+    int main() {
+        int nums[] = {1, 2, 3, 4, 5};
+        int size = sizeof(nums) / sizeof(nums[0]);
+        int squared[size];
+    
+        squareNumbers(nums, squared, size);
+    
+        for (int i = 0; i < size; i++) {
+            printf("%d ", squared[i]);
+        }
+        printf("\n");
+    
+        return 0;
+    }
+        
+`;
+
+{% endblock %}
+
+{% block result_check %}
+    let ans = result.stdout || result.stderr || "No output";
+    if (ans.trim() === "[1, 4, 9, 16, 25]" || ans.trim() === "1 4 9 16 25") {
+        document.getElementById("output").textContent = "- .... (Note this Morse code for further use)";
+    } else {
+        document.getElementById("output").textContent = ans;
+    }
+{% endblock %}
+

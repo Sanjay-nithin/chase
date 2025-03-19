@@ -1,0 +1,107 @@
+{% extends 'level_1/level1base.html' %}
+
+{%block timer%}
+let timeLeft = 900;
+{% endblock %}
+
+{% block questions %}
+let python_code = `# Debugging Problem: The Broken Purifier
+# The purifier should remove all 'toxin' elements, but some remain!
+
+def purify_water(chemicals):
+    for item in chemicals:
+        if item == "toxin":
+            chemicals.remove(item)  # Bug: Removing while iterating
+    return chemicals
+
+water_sample = ["water", "toxin", "water", "toxin", "toxin", "water"]
+print(purify_water(water_sample))
+`;
+
+let java_code = `// Debugging Problem: The Broken Purifier
+// The purifier should remove all 'toxin' elements, but some remain!
+
+import java.util.*;
+
+class Main {
+    public static List<String> purifyWater(List<String> chemicals) {
+        chemicals.removeIf(item -> item.equals("toxin"));
+        return chemicals;
+    }
+
+    public static void main(String[] args) {
+        List<String> waterSample = new ArrayList<>(Arrays.asList("water", "toxin", "water", "toxin", "toxin", "water"));
+        System.out.println(purifyater(waterSample));
+    }
+}
+`;
+
+let cpp_code = `// Debugging Problem: The Broken Purifier
+// The purifier should remove all 'toxin' elements, but some remain!
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void purifyWater(vector<string>& chemicals) {
+    for (string item : chemicals) {
+        if (item == "toxin") {
+            chemicals.erase(find(chemicals.begin(), chemicals.end(), item)); // Bug: Removing while iterating
+        }
+    }
+}
+
+int main() {
+    vector<strig> waterSample = {"water", "toxin", "water", "toxin", "toxin", "water"};
+    purifyWater(waterSample);
+
+    for (string item : waterSample) {
+        cout << item << " ";
+    }
+}
+`;
+
+let c_code = `#include <stdio.h>
+    #include <string.h>
+    
+    void purifyWater(char chemicals[][10], int *size) {
+        int newSize = 0;
+        for (int i = 0; i < *size; i++) {
+            if (strcmp(chemicals[i], "toxin") != 0) {
+                strcpy(chemicals[newSize++], chemicals[i]); // Shift non-toxin elements
+            }
+        }
+        *size = newSize; // Update size
+    }
+    
+    int main() {
+        char chemicals[6][10] = {"water", "toxin", "water", "toxin", "toxin", "water"};
+        int size = 6;
+        purifWater(chemicals, &size);
+    
+        for (int i = 0; i < size; i++) {
+            printf("%s ", chemicals[i]);
+        }
+        return 0;
+    }
+    
+`;
+
+{% endblock %}
+
+{% block redirection %}
+document.getElementById("next-btn").addEventListener("click", () => {
+    window.location.href = "{% url 'question' level=1 question=2 %}"; // Change this to the actual next page URL
+});
+{% endblock %}
+
+{% block result_check %}
+    let ans = result.stdout || result.stderr || "No output";
+    if (ans.trim() === "['water', 'water', 'water']" || ans.trim() === '[water, water, water]' || ans.trim() === 'water water water') {
+        document.getElementById("output").textContent = ".--. (Note this morse code for further use)";
+    }
+    else {
+        document.getElementById("output").textContent = ans;
+    }
+{% endblock %}

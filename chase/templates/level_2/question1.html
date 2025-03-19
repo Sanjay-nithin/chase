@@ -1,0 +1,49 @@
+{% extends 'level_2/level2base.html' %}
+
+{% block timer %}
+let timeLeft = 900;
+{% endblock %}
+
+{% block content %}
+<div class="w-full lg:w-1/3 bg-gray-800 p-6 rounded-xl shadow-xl border border-gray-700">
+    <h1 class="text-3xl font-bold text-cyan-400">CHALLENGE-1</h1>
+    <h2 class="text-xl font-semibold mt-2 text-gray-200">The Door of Sequences:</h2>
+    <p class="mt-4 text-gray-300">
+        "The sum of the first N even numbers will reveal the key."
+    </p>
+    <p class="mt-2 text-gray-300">
+        Write a function to calculate the sum of the first N even numbers.
+    </p>
+    <h3 class="text-lg font-semibold mt-4 text-yellow-400">TEST CASE:</h3>
+    <p id="input" class="bg-gray-700 text-gray-200 p-2 rounded mt-2">
+        INPUT: 10
+    </p>
+</div>
+{% endblock %}
+
+{% block redirection %}
+document.getElementById("next-btn").addEventListener("click", () => {
+    window.location.href = "{% url 'question' level=2 question=2 %}"; // Change this to the actual next page URL
+});
+{% endblock %}
+
+{% block data %}
+const data = {
+    language_id: language,
+    source_code: code,
+    stdin: 20, 
+    cpu_time_limit: 2,
+    memory_limit: 128000
+};
+{% endblock %}
+
+{% block result_check %}
+    let ans = result.stdout || result.stderr || "No output";
+    const code = editor.getValue();
+    if (ans.trim() === "110") {
+        document.getElementById("output").textContent = "-.... (Note this morse code for further use)";
+    }
+    else {
+        document.getElementById("output").textContent = ans;
+    }
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'level_1/level1base.html' %}
+
+
+{% block timer%}
+let timeLeft = sessionStorage.getItem("timeLeft") ? parseInt(sessionStorage.getItem("timeLeft")) : 900;
+{% endblock %}
+
+{% block questions %}
+let python_code = `# Debugging Problem: The Corrupted Sensor
+# The pollution sensor should reset negative values, but it fails!
+
+def measure_pollution(levels):
+    for i in range(len(levels)):
+        if levels[i] < 0:
+            levels[i] == 0 
+    return levels
+
+print(measure_pollution([30, -5, 40, -10, 20]))
+`;
+
+let java_code = `// Debugging Problem: The Corrupted Sensor
+// The pollution sensor should reset negative values, but it fails!
+
+class Main {
+    public static int[] measurePollution(int[] levels) {
+        for (int i = 0; i < levels.length; i++) {
+            if (levels[i] < 0) {
+                levels[i] == 0; // Fixed: Assigning 0 correctly
+            }
+        }
+        return levels;
+    }
+
+    public static void main(String[] args) {
+        int[] pollutionLevels = {5, -3, 10, -8, 7, -1};
+        pollutionLevels = measurePollution(pollutionLevels);
+
+        for (int level : pollutionLevels) {
+            System.out.print(level + " ");
+        }
+    }
+}
+
+`;
+
+let cpp_code = `// Debugging Problem: The Corrupted Sensor
+// The pollution sensor should reset negative values, but it fails!
+
+#include <iostream>
+    using namespace std;
+    
+    void measurePollution(int levels[], int size) {
+        for (int i = 0; i < size; i++) {
+            if (levels[i] < 0) {
+                levels[i] == 0; // Fixed: Assigning 0 correctly
+            }
+        }
+    }
+    
+    int main() {
+        int pollutionLevels[] = {5, -3, 10, -8, 7, -1};
+        int size = sizeof(pollutionLevels) / sizeof(pollutionLevels[0]);
+    
+        measurePollution(pollutionLevels, size);
+    
+        for (int i = 0; i < size; i++) {
+            cout << pollutionLevels[i] << " ";
+        }
+    
+        return 0;
+    }
+    
+`;
+
+let c_code = `// Debugging Problem: The Corrupted Sensor
+// The pollution sensor should reset negative values, but it fails!
+
+#include <stdio.h>
+
+#include <iostream>
+using namespace std;
+
+void measurePollution(int levels[], int size) {
+    for (int i = 0; i < size; i++) {
+        if (levels[i] < 0) {
+            levels[i] == 0; // ✅ Correct: Assign 0 to negative values
+        }
+    }
+}
+
+int main() {
+    int pollutionLevels[] = {5, -3, 10, -8, 7, -1};
+    int size = sizeof(pollutionLevels) / sizeof(pollutionLevels[0]);
+
+    measurePollution(pollutionLevels, size);
+
+    // Output the modified array
+    for (int i = 0; i < size; i++) {
+        cout << pollutionLevels[i] << " ";
+    }
+
+    return 0;
+}
+        
+`;
+
+{% endblock %}
+
+{% block redirection %}
+document.getElementById("next-btn").addEventListener("click", () => {
+    window.location.href = "{% url 'question' level=1 question=3 %}"; 
+});
+{% endblock %}
+
+{% block result_check %}
+    let ans = result.stdout || result.stderr || "No output";
+    if (ans.trim() === "[30, 0, 40, 0, 20]" || ans.trim() === "5 0 10 0 7 0") {
+        document.getElementById("output").textContent = "..-. (Note this Morse code for further use)";
+    }
+    else {
+        document.getElementById("output").textContent = ans;
+    }
+{% endblock %}
